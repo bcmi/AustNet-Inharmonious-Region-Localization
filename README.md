@@ -1,6 +1,6 @@
 # AustNet-Inharmonious-Region-Localization
 
-![teaser](assets/teaser_.png)
+![teaser](assets/pipeline.png)
 
 This is the official code of the paper:
 > Inharmonious Region Localization with Auxiliary Style Feature           
