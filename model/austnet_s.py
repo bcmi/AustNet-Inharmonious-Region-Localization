@@ -46,8 +46,6 @@ class AustNet_S(nn.Module):
 
 		self.decoder = austs_decoder()
 
-		self.semantic_model = None
-
 		self.H = 28
 		self.W = 28
 

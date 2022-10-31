@@ -18,6 +18,8 @@ def ArgsParser():
         parser.add_argument('--nepochs', type=int, default=250, help='# of training epochs')
         parser.add_argument('--gpus', type=int, default=4, help='# of GPUs used for training')
         parser.add_argument('--lr', type=float, default=0.0001, help='initial learning rate for adam')
+
+        parser.add_argument('--ckpt', type=str, default="", help='model ckpt for testing')
         
         parser = parser.parse_args()
         return parser

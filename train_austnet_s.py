@@ -17,6 +17,7 @@ from model.austnet_s import AustNet_S, feature_loss
 from options import ArgsParser
 
 sys.path.append("HRNet-Semantic-Segmentation-HRNet-OCR/lib")
+import models 
 from config import config
 from config import update_config
 
@@ -34,8 +35,7 @@ class Engine(pl.LightningModule):
 		self.iou_loss = pytorch_iou.IOU(size_average=True)
 
 	def setup_semantic_model(self):
-		parser = argparse.ArgumentParser(description='Train segmentation network')
-		args = parser.parse_args()
+		args = self.opt
 		args.cfg = "HRNet-Semantic-Segmentation-HRNet-OCR/experiments/cocostuff/seg_hrnet_ocr_w48_520x520_ohem_sgd_lr1e-3_wd1e-4_bs_16_epoch110.yaml"
 		args.opts = []
 		update_config(config, args)
@@ -83,7 +83,7 @@ class Engine(pl.LightningModule):
 		self.semantic_model.eval()
 		with torch.no_grad():
 			semantic_feature, semantic_out = self.semantic_model(comp)
-		out, aux_list, init_score, final_score, feature = self.model(comp, yuv, semantic_feature.detach())
+		out, aux_list, init_score, final_score, feature, transfered_yuv = self.model(comp, yuv, semantic_feature.detach())
 		aux1, aux2, aux3 = aux_list[0], aux_list[1], aux_list[2]
 
 		out = torch.clamp(out, 0, 1)
@@ -144,7 +144,7 @@ class Engine(pl.LightningModule):
 		yuv = batch['yuv']
 		self.semantic_model.eval()
 		semantic_feature, semantic_out = self.semantic_model(comp)
-		out, _, _,_,_ = self.model(comp, yuv, semantic_feature.detach())
+		out, _, _,_,_,_ = self.model(comp, yuv, semantic_feature.detach())
 
 		out = normPRED(out)
 		mask = normPRED(mask)
@@ -180,22 +180,22 @@ if __name__ == '__main__':
 	engine = Engine(opt)
 
 	checkpoint_callback = ModelCheckpoint(save_weights_only=False, mode="max", monitor="mAP", save_top_k=2, save_last=True,
-											dirpath=opt.logdir, filename="best_{epoch:02d}-{mAP:.3f}", auto_insert_metric_name=False)
+											dirpath=opt.logdir, filename="best_{epoch:02d}-{mAP:.3f}")
 	checkpoint_callback.CHECKPOINT_NAME_LAST = "{epoch}-last"
 	trainer = pl.Trainer.from_argparse_args(opt,
 											default_root_dir=opt.logdir,
 											sync_batchnorm=True,
-											gpus = 4,
+											gpus = opt.gpus ,
 											accelerator='ddp',
 											profiler='simple',
 											benchmark=True,
 											log_every_n_steps=1,
-											plugins=DDPPlugin(find_unused_parameters=False),
-											find_unused_parameters=False,
+											plugins=DDPPlugin(find_unused_parameters=True),
 											flush_logs_every_n_steps=5,
 											callbacks=[checkpoint_callback,
 														],
 											check_val_every_n_epoch = 3,
+											max_epochs = opt.nepochs
 											)
 
 	trainer.fit(engine, dataloader_train, dataloader_val)
