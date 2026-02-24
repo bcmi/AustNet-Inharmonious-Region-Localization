@@ -7,6 +7,11 @@ This is the official code of the paper:
 Penghao Wu, Li Niu, Liqing Zhang                                                             
 [arXiv Paper](https://arxiv.org/abs/2210.02029), BMVC 2022
 
+## Online Demo
+
+Try this [online demo](http://libcom.ustcnewly.com/) for image composition (object insertion) built upon [libcom](https://github.com/bcmi/libcom) toolbox and have fun!
+
+[![]](https://github.com/user-attachments/assets/87416ec5-2461-42cb-9f2d-5030b1e1b5ec)
 
 ## Install
 Clone this repo and build the environment
